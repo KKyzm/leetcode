@@ -11,4 +11,4 @@ leetcode:
 editor:
   use: custom
   command: "nvim"
-  args: "{{.CodeFile}}"
+  args: "{{.CodeFile}} {{.DescriptionFile}}"
