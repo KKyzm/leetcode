@@ -1,0 +1,14 @@
+# This is the leetgo project level config, global config is at /home/yaniru/.config/leetgo/config.yaml
+# For more details, please refer to https://github.com/j178/leetgo
+language: zh
+code:
+  lang: cpp
+leetcode:
+  site: https://leetcode.cn
+  credentials:
+    from: browser
+    browsers: [firefox]
+editor:
+  use: custom
+  command: "nvim"
+  args: "{{.CodeFile}}"
