@@ -3,6 +3,11 @@
 language: zh
 code:
   lang: cpp
+  cpp:
+    blocks:
+      - name: beforeMarker
+        template: |
+          // TODO: complete this problem
 leetcode:
   site: https://leetcode.cn
   credentials:
