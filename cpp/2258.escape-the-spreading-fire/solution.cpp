@@ -4,6 +4,7 @@
 
 #include "LC_IO.h"
 #include <bits/stdc++.h>
+#include <functional>
 #include <utility>
 #include <vector>
 using namespace std;
@@ -18,29 +19,21 @@ public:
     fireSpreadBFS(grid);
 
     // play clever
-    // clang-format off
     if (grid[0][1] == 0 or grid[1][0] == 0) {
-      auto visited = vector<vector<int>>(grid.size(), vector<int>(grid[0].size(), 0));
       auto visitcell = [&](int x, int y, int min) -> bool {
-        if (not isvalid(grid, x, y)) { return false; }
-        if (grid[x][y] > 0)          { return false; }
-        if (visited[x][y] == 1)      { return false; }
-        visited[x][y] = 1;
+        if (not isvalid(grid, x, y)) {
+          return false;
+        }
+        if (grid[x][y] != 0) {
+          return false;
+        }
         return true;
       };
-      auto q = queue<node>{};
-      q.push({0, 0, 0});
-      visited[0][0] = 1;
-      while (q.empty() == false) {
-        auto n = q.front();
-        if (n.x == grid.size() - 1 and n.y == grid[0].size() - 1) return 1E9;
-        q.pop();
-        if (visitcell(n.x - 1, n.y, n.min + 1)) { q.push({n.x - 1, n.y, n.min + 1}); }
-        if (visitcell(n.x + 1, n.y, n.min + 1)) { q.push({n.x + 1, n.y, n.min + 1}); }
-        if (visitcell(n.x, n.y - 1, n.min + 1)) { q.push({n.x, n.y - 1, n.min + 1}); }
-        if (visitcell(n.x, n.y + 1, n.min + 1)) { q.push({n.x, n.y + 1, n.min + 1}); }
+      if (BFS(grid, visitcell)) {
+        return 1E9;
+      } else {
+        return -1;
       }
-      return -1;
     }
 
     // binary search
@@ -48,36 +41,32 @@ public:
     int r = 2E4;
     int ans = -1;
     while (l <= r) {
-      int m = l  + (r - l) / 2;
-      auto visited = vector<vector<int>>(grid.size(), vector<int>(grid[0].size(), 0));
+      int m = l + (r - l) / 2;
       auto visitcell = [&](int x, int y, int min) -> bool {
-        if ((x == grid.size() - 1 and y == grid[0].size() - 1) 
-            and (0 - grid[x][y] == m + min)) { return true; }
-        if (not isvalid(grid, x, y))                     { return false; }
-        if (visited[x][y] == 1)                          { return false; }
-        if (grid[x][y] > 0)                              { return false; }
-        if (grid[x][y] < 0 && 0 - grid[x][y] <= m + min) { return false; }
-        visited[x][y] = 1;
+        if ((x == grid.size() - 1 and y == grid[0].size() - 1) and
+            (0 - grid[x][y] == m + min)) {
+          return true;
+        }
+        if (not isvalid(grid, x, y)) {
+          return false;
+        }
+        if (grid[x][y] > 0) {
+          return false;
+        }
+        if (grid[x][y] < 0 && 0 - grid[x][y] <= m + min) {
+          return false;
+        }
         return true;
       };
-      auto q = queue<node>{};
-      q.push({0, 0, 0});
-      visited[0][0] = 1;
-      while (q.empty() == false) {
-        auto n = q.front();
-        if (n.x == grid.size() - 1 and n.y == grid[0].size() - 1) break;
-        q.pop();
-        if (visitcell(n.x - 1, n.y, n.min + 1)) { q.push({n.x - 1, n.y, n.min + 1}); }
-        if (visitcell(n.x + 1, n.y, n.min + 1)) { q.push({n.x + 1, n.y, n.min + 1}); }
-        if (visitcell(n.x, n.y - 1, n.min + 1)) { q.push({n.x, n.y - 1, n.min + 1}); }
-        if (visitcell(n.x, n.y + 1, n.min + 1)) { q.push({n.x, n.y + 1, n.min + 1}); }
+      if (BFS(grid, visitcell)) {
+        ans = m;
+        l = m + 1;
+      } else {
+        r = m - 1;
       }
-      if (q.empty())  r = m - 1;
-      else { ans = m; l = m + 1; }
     }
 
     return ans;
-    // clang-format on
   }
 
 private:
@@ -100,28 +89,55 @@ private:
    * -grid[x][y] minutes
    */
   void fireSpreadBFS(Grid &grid) {
-    auto q = queue<node>{};
+    auto q = list<node>{};
     for (int i = 0; i < grid.size(); i++)
       for (int j = 0; j < grid[0].size(); j++)
         if (grid[i][j] == 1)
-          q.push({i, j, 0});
+          q.push_front({i, j, 0});
     auto setcell = [&](int x, int y, int min) -> bool {
-      // clang-format off
-      if (not isvalid(grid, x, y)) { return false; }
-      if (grid[x][y] == 0) { grid[x][y] = -min; return true; }
-      else { return false; }
-      // clang-format on
+      if (not isvalid(grid, x, y)) {
+        return false;
+      }
+      if (grid[x][y] == 0) {
+        grid[x][y] = -min;
+        return true;
+      } else {
+        return false;
+      }
     };
-    while (q.empty() == false) {
-      auto n = q.front();
-      q.pop();
-      // clang-format off
-      if (setcell(n.x, n.y - 1, n.min + 1)) { q.push({n.x, n.y - 1, n.min + 1}); }
-      if (setcell(n.x, n.y + 1, n.min + 1)) { q.push({n.x, n.y + 1, n.min + 1}); }
-      if (setcell(n.x - 1, n.y, n.min + 1)) { q.push({n.x - 1, n.y, n.min + 1}); }
-      if (setcell(n.x + 1, n.y, n.min + 1)) { q.push({n.x + 1, n.y, n.min + 1}); }
-      // clang-format on
+    BFS(grid, setcell, false, q);
+  }
+
+  bool BFS(Grid &grid, function<bool(int, int, int)> visitcell, bool fe = true,
+           list<node> q = list<node>{{0, 0, 0}}) {
+    auto visited =
+        vector<vector<int>>(grid.size(), vector<int>(grid[0].size(), 0));
+    for (auto n : q) {
+      visited[n.x][n.y] = 1;
     }
+    while (q.empty() == false) {
+      auto n = q.back();
+      if (fe and n.x == grid.size() - 1 and n.y == grid[0].size() - 1)
+        return true;
+      q.pop_back();
+      if (visitcell(n.x - 1, n.y, n.min + 1) and (visited[n.x - 1][n.y] == 0)) {
+        visited[n.x - 1][n.y] = 1;
+        q.push_front({n.x - 1, n.y, n.min + 1});
+      }
+      if (visitcell(n.x + 1, n.y, n.min + 1) and (visited[n.x + 1][n.y] == 0)) {
+        visited[n.x + 1][n.y] = 1;
+        q.push_front({n.x + 1, n.y, n.min + 1});
+      }
+      if (visitcell(n.x, n.y - 1, n.min + 1) and (visited[n.x][n.y - 1] == 0)) {
+        visited[n.x][n.y - 1] = 1;
+        q.push_front({n.x, n.y - 1, n.min + 1});
+      }
+      if (visitcell(n.x, n.y + 1, n.min + 1) and (visited[n.x][n.y + 1] == 0)) {
+        visited[n.x][n.y + 1] = 1;
+        q.push_front({n.x, n.y + 1, n.min + 1});
+      }
+    }
+    return false;
   }
 };
 

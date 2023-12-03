@@ -1,0 +1,9 @@
+input:
+["abcd","cdab","cbad","xyzz","zzxy","zzyx"]
+output:
+3
+
+input:
+["abc","acb","bac","bca","cab","cba"]
+output:
+3
